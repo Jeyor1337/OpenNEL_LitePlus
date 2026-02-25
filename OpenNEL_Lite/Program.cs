@@ -52,6 +52,7 @@ internal class Program
         TcpServer server = new TcpServer(port, "/gateway", Log.Logger);
         await server.StartAsync();
         await InitializeSystemComponentsAsync();
+        await UserManager.Instance.ReadUsersFromDiskAsync();
         AppState.Services = await CreateServices();
         await AppState.Services.X19.InitializeDeviceAsync();
 

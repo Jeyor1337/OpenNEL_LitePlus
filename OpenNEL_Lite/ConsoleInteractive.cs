@@ -287,8 +287,8 @@ internal class ConsoleInteractive
 
             if (loginSuccess) return;
 
-            PrintColored("  登录失败，10秒后重新获取小号...", ConsoleColor.Yellow);
-            await Task.Delay(TimeSpan.FromSeconds(10));
+            PrintColored("  登录失败，5秒后重新获取小号...", ConsoleColor.Yellow);
+            await Task.Delay(TimeSpan.FromSeconds(5));
             Console.Clear();
             PrintColored("── 随机获取小号 ──", ConsoleColor.Cyan);
             Console.WriteLine();
@@ -297,15 +297,195 @@ internal class ConsoleInteractive
 
     async Task ListAccountsAsync()
     {
-        PrintColored("── 账号列表 ──", ConsoleColor.Cyan);
-        await SendJsonAsync(new { type = "list_accounts" });
-        await ReadAllResponsesAsync(5);
+        while (true)
+        {
+            Console.Clear();
+            PrintColored("── 账号列表 ──", ConsoleColor.Cyan);
+            Console.WriteLine();
+            PrintColored("  正在获取账号列表...", ConsoleColor.Yellow);
+            await SendJsonAsync(new { type = "list_accounts" });
+
+            var accounts = new List<(string EntityId, string Channel, string Status)>();
+            var endTime = DateTime.UtcNow.AddSeconds(10);
+            var gotAny = false;
+            while (DateTime.UtcNow < endTime)
+            {
+                var left = (int)(endTime - DateTime.UtcNow).TotalSeconds;
+                var timeout = gotAny ? Math.Min(left, 2) : left;
+                var line = await ReadLineAsync(Math.Max(1, timeout));
+                if (line == null) break;
+                gotAny = true;
+
+                var handled = false;
+                try
+                {
+                    using var doc = JsonDocument.Parse(line);
+                    var root = doc.RootElement;
+                    var type = root.TryGetProperty("type", out var tp) ? tp.GetString() ?? "" : "";
+
+                    if (type == "accounts")
+                    {
+                        if (root.TryGetProperty("items", out var items) && items.ValueKind == JsonValueKind.Array)
+                        {
+                            foreach (var item in items.EnumerateArray())
+                            {
+                                var entityId = item.TryGetProperty("entityId", out var e) ? e.GetString() ?? "" : "";
+                                var channel = item.TryGetProperty("channel", out var c) ? c.GetString() ?? "" : "";
+                                var status = item.TryGetProperty("status", out var s) ? s.GetString() ?? "offline" : "offline";
+                                if (!string.IsNullOrEmpty(entityId))
+                                    accounts.Add((entityId, channel, status));
+                            }
+                        }
+                        handled = true;
+                        break;
+                    }
+                }
+                catch
+                {
+                }
+
+                if (!handled)
+                    PrintResponse(line);
+            }
+
+            var menuItems = new List<string>(accounts.Select(a => $"[{a.EntityId}] 渠道:{a.Channel} 状态:{a.Status}"))
+            {
+                "刷新列表",
+                "返回"
+            };
+
+            var choice = SelectMenu("查看账号列表", menuItems.ToArray(), true);
+            if (choice == -1 || choice == menuItems.Count - 1) return;
+            if (choice == menuItems.Count - 2) continue;
+
+            var selected = accounts[choice];
+            while (true)
+            {
+                var isOnline = string.Equals(selected.Status, "online", StringComparison.OrdinalIgnoreCase);
+                var actionItems = isOnline
+                    ? new[] { "取消激活", "删除账号", "返回" }
+                    : new[] { "激活账号", "删除账号", "返回" };
+
+                var action = SelectMenu($"账号操作 [{selected.EntityId}]", actionItems, true);
+                if (action == -1 || action == actionItems.Length - 1) break;
+
+                if (action == 0)
+                {
+                    if (isOnline)
+                    {
+                        PrintColored("  正在取消激活...", ConsoleColor.Yellow);
+                        await SendJsonAsync(new { type = "deactivate_account", entityId = selected.EntityId });
+                    }
+                    else
+                    {
+                        PrintColored("  正在激活账号...", ConsoleColor.Yellow);
+                        await SendJsonAsync(new { type = "activate_account", entityId = selected.EntityId });
+                    }
+                    await ReadAllResponsesAsync(10);
+                    break;
+                }
+
+                var confirm = SelectMenu("确认删除该账号?", new[] { "确认删除", "取消" }, true);
+                if (confirm != 0) continue;
+
+                PrintColored("  正在删除账号...", ConsoleColor.Yellow);
+                await SendJsonAsync(new { type = "delete_account", entityId = selected.EntityId });
+                await ReadAllResponsesAsync(10);
+                break;
+            }
+        }
     }
+
 
     static readonly (string Name, string Id)[] BuiltInServers =
     [
         ("布吉岛", "4661334467366178884"),
     ];
+
+    async Task<(string Name, string Id)?> SearchServerAsync()
+    {
+        while (true)
+        {
+            Console.Clear();
+            PrintColored("── 搜索服务器 ──", ConsoleColor.Cyan);
+            Console.WriteLine();
+            Console.Write("  搜索关键词 (输入空行返回): ");
+            var keyword = Console.ReadLine()?.Trim() ?? "";
+            if (string.IsNullOrEmpty(keyword)) return null;
+
+            PrintColored("  正在搜索...", ConsoleColor.Yellow);
+            await SendJsonAsync(new { type = "search_server", keyword });
+
+            var servers = new List<(string Name, string Id)>();
+            var endTime = DateTime.UtcNow.AddSeconds(15);
+            var gotAny = false;
+            while (DateTime.UtcNow < endTime)
+            {
+                var left = (int)(endTime - DateTime.UtcNow).TotalSeconds;
+                var timeout = gotAny ? Math.Min(left, 2) : left;
+                var line = await ReadLineAsync(Math.Max(1, timeout));
+                if (line == null) break;
+                gotAny = true;
+
+                try
+                {
+                    using var doc = JsonDocument.Parse(line);
+                    var root = doc.RootElement;
+                    var type = root.TryGetProperty("type", out var tp) ? tp.GetString() ?? "" : "";
+
+                    if (type == "search_server_result")
+                    {
+                        if (root.TryGetProperty("items", out var arr) && arr.ValueKind == JsonValueKind.Array)
+                            foreach (var item in arr.EnumerateArray())
+                            {
+                                var name = item.TryGetProperty("name", out var n) ? n.GetString() ?? "" : "";
+                                var eid = item.TryGetProperty("entityId", out var e) ? e.GetString() ?? "" : "";
+                                if (!string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(eid))
+                                    servers.Add((name, eid));
+                            }
+                        break;
+                    }
+                    else if (type == "search_server_error")
+                    {
+                        var msg = root.TryGetProperty("message", out var m) ? m.GetString() ?? "" : "";
+                        PrintColored($"  搜索失败: {msg}", ConsoleColor.Red);
+                        WaitKey();
+                        break;
+                    }
+                    else if (type == "notlogin")
+                    {
+                        PrintColored("  未登录，请先登录账号", ConsoleColor.Red);
+                        return null;
+                    }
+                    else
+                    {
+                        PrintResponse(line);
+                    }
+                }
+                catch
+                {
+                    PrintResponse(line);
+                }
+            }
+
+            if (servers.Count == 0)
+            {
+                PrintColored("  未找到服务器，请重新搜索", ConsoleColor.Yellow);
+                WaitKey();
+                continue;
+            }
+
+            var menuItems = servers.Select(s => $"{s.Name} (ID: {s.Id})").ToList();
+            menuItems.Add("重新搜索");
+            menuItems.Add("返回");
+
+            var choice = SelectMenu($"搜索结果 - \"{keyword}\"", menuItems.ToArray(), true);
+            if (choice == -1 || choice == menuItems.Count - 1) return null;
+            if (choice == menuItems.Count - 2) continue;
+
+            return servers[choice];
+        }
+    }
 
     async Task JoinGameAsync()
     {
@@ -314,6 +494,7 @@ internal class ConsoleInteractive
         Console.WriteLine();
 
         var serverMenuItems = BuiltInServers.Select(s => $"{s.Name} ({s.Id})").ToList();
+        serverMenuItems.Add("[搜索服务器]");
         serverMenuItems.Add("[手动输入服务器ID]");
         serverMenuItems.Add("返回");
 
@@ -325,11 +506,21 @@ internal class ConsoleInteractive
         {
             serverId = BuiltInServers[serverChoice].Id;
         }
-        else
+        else if (serverChoice == BuiltInServers.Length)
+        {
+            var result = await SearchServerAsync();
+            if (result == null) return;
+            serverId = result.Value.Id;
+        }
+        else if (serverChoice == BuiltInServers.Length + 1)
         {
             Console.Write("  服务器ID (输入空行返回): ");
             serverId = Console.ReadLine()?.Trim() ?? "";
             if (string.IsNullOrEmpty(serverId)) return;
+        }
+        else
+        {
+            return;
         }
 
         PrintColored("  正在获取角色列表...", ConsoleColor.Yellow);
@@ -393,7 +584,6 @@ internal class ConsoleInteractive
             if (cc != 0) return;
 
             await CreateRoleAndJoinAsync(serverId, roles);
-            if (roles.Count == 0) return;
         }
 
         while (true)
@@ -409,7 +599,6 @@ internal class ConsoleInteractive
             if (roles.Count < 3 && choice == menuItems.Count - 2)
             {
                 await CreateRoleAndJoinAsync(serverId, roles);
-                if (roles.Count == 0) return;
 
                 menuItems = new List<string>(roles);
                 if (roles.Count < 3)
@@ -689,16 +878,20 @@ internal class ConsoleInteractive
         Console.WriteLine("══════════════════════════════════════");
         Console.ResetColor();
         Console.WriteLine();
-        PrintColored("  OpenNEL Lite Plus 基于开源项目 OpenNEL Lite 构建。", ConsoleColor.White);
+        PrintColored("  OpenNEL Lite Plus", ConsoleColor.White);
+        Console.WriteLine($"    版本: {AppInfo.AppVersion}");
+        Console.WriteLine($"    仓库: {AppInfo.GithubUrL}");
+        Console.WriteLine($"    QQ群: {AppInfo.QQGroup}");
+        Console.WriteLine("    协议: MIT License");
+        Console.WriteLine("    基于开源项目 OpenNEL Lite 构建，进行了二次开发与功能扩展。");
         Console.WriteLine();
         PrintColored("  原始项目:", ConsoleColor.DarkYellow);
         Console.WriteLine("    名称: OpenNEL Lite");
-        Console.WriteLine("    仓库: https://github.com/AimCloudX/OpenNEL_Lite");
+        Console.WriteLine("    仓库: https://github.com/OxygenNEL/OpenNEL_Lite");
         Console.WriteLine("    协议: MIT License");
         Console.WriteLine();
         PrintColored("  致谢:", ConsoleColor.DarkYellow);
         Console.WriteLine("    感谢 OpenNEL Lite 项目及其贡献者提供的开源基础代码。");
-        Console.WriteLine("    本项目在其基础上进行了二次开发与功能扩展。");
         Console.WriteLine();
         PrintColored("  依赖项目:", ConsoleColor.DarkYellow);
         Console.WriteLine("    Codexus SDK - 核心 SDK 支持");
@@ -832,6 +1025,28 @@ internal class ConsoleInteractive
 
                 case "server_roles_error":
                     PrintColored("  ✗ 获取角色失败", ConsoleColor.Red);
+                    PrintField("原因", root, "message");
+                    break;
+
+                case "search_server_result":
+                    PrintColored("  ── 搜索结果 ──", ConsoleColor.Cyan);
+                    PrintField("关键词", root, "keyword");
+                    if (root.TryGetProperty("items", out var searchItems) && searchItems.ValueKind == JsonValueKind.Array)
+                    {
+                        var idx2 = 1;
+                        foreach (var item in searchItems.EnumerateArray())
+                        {
+                            var name = item.TryGetProperty("name", out var n) ? n.GetString() ?? "?" : "?";
+                            var eid = item.TryGetProperty("entityId", out var e) ? e.GetString() ?? "?" : "?";
+                            Console.WriteLine($"    {idx2}. {name} (ID: {eid})");
+                            idx2++;
+                        }
+                        if (idx2 == 1) PrintColored("    (无结果)", ConsoleColor.DarkGray);
+                    }
+                    break;
+
+                case "search_server_error":
+                    PrintColored("  ✗ 搜索服务器失败", ConsoleColor.Red);
                     PrintField("原因", root, "message");
                     break;
 

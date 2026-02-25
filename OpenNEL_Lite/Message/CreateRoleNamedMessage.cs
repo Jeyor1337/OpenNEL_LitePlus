@@ -27,7 +27,8 @@ internal class CreateRoleNamedMessage : IWsMessage
             if(AppState.Debug)Log.Information("角色创建成功: serverId={ServerId}, name={Name}", serverId, name);
             Entities<EntityGameCharacter> entities = AppState.X19.QueryNetGameCharacters(last.UserId, last.AccessToken, serverId);
 
-            return new { type = "server_roles", entities, serverId, createdName = name };
+            var items = entities.Data.Select(r => new { id = r.Name, name = r.Name }).ToArray();
+            return new { type = "server_roles", items, serverId, createdName = name };
         }
         catch (Exception ex)
         {

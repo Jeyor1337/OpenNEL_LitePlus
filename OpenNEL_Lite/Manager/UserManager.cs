@@ -17,7 +17,7 @@ namespace OpenNEL_Lite.Manager;
 
 public class UserManager : IUserManager
 {
-	private const string UsersFilePath = "users.json";
+	private static readonly string UsersFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "users.json");
 
 	private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
 	{

@@ -19,6 +19,7 @@ internal static class MessageFactory
             new Login4399Message(),
             new LoginX19Message(),
             new ActivateAccountMessage(),
+            new DeactivateAccountMessage(),
             new DeleteAccountMessage(),
             new GetAccountMessage(),
             new SelectAccountMessage(),
@@ -27,7 +28,8 @@ internal static class MessageFactory
             new JoinGameMessage(),
             new ShutdownGameMessage(),
             new GetRunningGamesMessage(),
-            new GetFreeAccountMessage()
+            new GetFreeAccountMessage(),
+            new SearchServerMessage()
         };
         Map = handlers.ToDictionary(h => h.Type, h => h);
     }

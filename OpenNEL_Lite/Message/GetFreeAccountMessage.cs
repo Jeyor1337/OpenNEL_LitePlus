@@ -132,7 +132,7 @@ internal class GetFreeAccountMessage : IWsMessage
         {
             client?.Dispose();
         }
-        End:
+    End:
         return new object[] { status, resultPayload ?? new { type = "get_free_account_result", success = false, message = "未知错误" } };
     }
 
