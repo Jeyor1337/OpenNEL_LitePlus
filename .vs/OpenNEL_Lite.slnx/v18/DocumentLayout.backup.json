@@ -1,0 +1,88 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\Users\\Administrator\\source\\OpenNEL_Lite-main\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{B676D226-B06F-73A3-5CF5-E30B245BDFE2}|OpenNEL_Lite\\OpenNEL_Lite.csproj|d:\\users\\administrator\\source\\opennel_lite-main\\opennel_lite\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B676D226-B06F-73A3-5CF5-E30B245BDFE2}|OpenNEL_Lite\\OpenNEL_Lite.csproj|solutionrelative:opennel_lite\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B676D226-B06F-73A3-5CF5-E30B245BDFE2}|OpenNEL_Lite\\OpenNEL_Lite.csproj|d:\\users\\administrator\\source\\opennel_lite-main\\opennel_lite\\enums\\platform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B676D226-B06F-73A3-5CF5-E30B245BDFE2}|OpenNEL_Lite\\OpenNEL_Lite.csproj|solutionrelative:opennel_lite\\enums\\platform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B676D226-B06F-73A3-5CF5-E30B245BDFE2}|OpenNEL_Lite\\OpenNEL_Lite.csproj|d:\\users\\administrator\\source\\opennel_lite-main\\opennel_lite\\message\\messagefactory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B676D226-B06F-73A3-5CF5-E30B245BDFE2}|OpenNEL_Lite\\OpenNEL_Lite.csproj|solutionrelative:opennel_lite\\message\\messagefactory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B676D226-B06F-73A3-5CF5-E30B245BDFE2}|OpenNEL_Lite\\OpenNEL_Lite.csproj|d:\\users\\administrator\\source\\opennel_lite-main\\opennel_lite\\utils\\crcsalt.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B676D226-B06F-73A3-5CF5-E30B245BDFE2}|OpenNEL_Lite\\OpenNEL_Lite.csproj|solutionrelative:opennel_lite\\utils\\crcsalt.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\Users\\Administrator\\source\\OpenNEL_Lite-main\\OpenNEL_Lite\\Program.cs",
+              "RelativeDocumentMoniker": "OpenNEL_Lite\\Program.cs",
+              "ToolTip": "D:\\Users\\Administrator\\source\\OpenNEL_Lite-main\\OpenNEL_Lite\\Program.cs",
+              "RelativeToolTip": "OpenNEL_Lite\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAHUAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-25T01:55:12.798Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Platform.cs",
+              "DocumentMoniker": "D:\\Users\\Administrator\\source\\OpenNEL_Lite-main\\OpenNEL_Lite\\Enums\\Platform.cs",
+              "RelativeDocumentMoniker": "OpenNEL_Lite\\Enums\\Platform.cs",
+              "ToolTip": "D:\\Users\\Administrator\\source\\OpenNEL_Lite-main\\OpenNEL_Lite\\Enums\\Platform.cs",
+              "RelativeToolTip": "OpenNEL_Lite\\Enums\\Platform.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-25T03:30:17.366Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "MessageFactory.cs",
+              "DocumentMoniker": "D:\\Users\\Administrator\\source\\OpenNEL_Lite-main\\OpenNEL_Lite\\Message\\MessageFactory.cs",
+              "RelativeDocumentMoniker": "OpenNEL_Lite\\Message\\MessageFactory.cs",
+              "ToolTip": "D:\\Users\\Administrator\\source\\OpenNEL_Lite-main\\OpenNEL_Lite\\Message\\MessageFactory.cs",
+              "RelativeToolTip": "OpenNEL_Lite\\Message\\MessageFactory.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAnAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-25T02:35:00.012Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "CrcSalt.cs",
+              "DocumentMoniker": "D:\\Users\\Administrator\\source\\OpenNEL_Lite-main\\OpenNEL_Lite\\Utils\\CrcSalt.cs",
+              "RelativeDocumentMoniker": "OpenNEL_Lite\\Utils\\CrcSalt.cs",
+              "ToolTip": "D:\\Users\\Administrator\\source\\OpenNEL_Lite-main\\OpenNEL_Lite\\Utils\\CrcSalt.cs",
+              "RelativeToolTip": "OpenNEL_Lite\\Utils\\CrcSalt.cs",
+              "ViewState": "AgIAAB0AAAAAAAAAAADwvysAAABWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-25T01:52:46.863Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

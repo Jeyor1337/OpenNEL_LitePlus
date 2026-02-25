@@ -1,0 +1,71 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\Users\\Administrator\\source\\OpenNEL_Lite-main\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{B676D226-B06F-73A3-5CF5-E30B245BDFE2}|OpenNEL_Lite\\OpenNEL_Lite.csproj|d:\\users\\administrator\\source\\opennel_lite-main\\opennel_lite\\message\\joingamemessage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B676D226-B06F-73A3-5CF5-E30B245BDFE2}|OpenNEL_Lite\\OpenNEL_Lite.csproj|solutionrelative:opennel_lite\\message\\joingamemessage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B676D226-B06F-73A3-5CF5-E30B245BDFE2}|OpenNEL_Lite\\OpenNEL_Lite.csproj|d:\\users\\administrator\\source\\opennel_lite-main\\opennel_lite\\type\\services.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B676D226-B06F-73A3-5CF5-E30B245BDFE2}|OpenNEL_Lite\\OpenNEL_Lite.csproj|solutionrelative:opennel_lite\\type\\services.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B676D226-B06F-73A3-5CF5-E30B245BDFE2}|OpenNEL_Lite\\OpenNEL_Lite.csproj|d:\\users\\administrator\\source\\opennel_lite-main\\opennel_lite\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B676D226-B06F-73A3-5CF5-E30B245BDFE2}|OpenNEL_Lite\\OpenNEL_Lite.csproj|solutionrelative:opennel_lite\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "JoinGameMessage.cs",
+              "DocumentMoniker": "D:\\Users\\Administrator\\source\\OpenNEL_Lite-main\\OpenNEL_Lite\\Message\\JoinGameMessage.cs",
+              "RelativeDocumentMoniker": "OpenNEL_Lite\\Message\\JoinGameMessage.cs",
+              "ToolTip": "D:\\Users\\Administrator\\source\\OpenNEL_Lite-main\\OpenNEL_Lite\\Message\\JoinGameMessage.cs",
+              "RelativeToolTip": "OpenNEL_Lite\\Message\\JoinGameMessage.cs",
+              "ViewState": "AgIAAEgAAAAAAAAAAAAAAFMAAABJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-25T05:38:08.336Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Services.cs",
+              "DocumentMoniker": "D:\\Users\\Administrator\\source\\OpenNEL_Lite-main\\OpenNEL_Lite\\Type\\Services.cs",
+              "RelativeDocumentMoniker": "OpenNEL_Lite\\Type\\Services.cs",
+              "ToolTip": "D:\\Users\\Administrator\\source\\OpenNEL_Lite-main\\OpenNEL_Lite\\Type\\Services.cs",
+              "RelativeToolTip": "OpenNEL_Lite\\Type\\Services.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-25T05:30:12.612Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\Users\\Administrator\\source\\OpenNEL_Lite-main\\OpenNEL_Lite\\Program.cs",
+              "RelativeDocumentMoniker": "OpenNEL_Lite\\Program.cs",
+              "ToolTip": "D:\\Users\\Administrator\\source\\OpenNEL_Lite-main\\OpenNEL_Lite\\Program.cs",
+              "RelativeToolTip": "OpenNEL_Lite\\Program.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAADwvx8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-25T01:55:12.798Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
