@@ -1,10 +1,7 @@
-OpenNEL_Lite
+OpenNEL_LitePlus
 ===========
 
-[![OpenNEL_Lite Download](https://img.shields.io/github/downloads/FandMC/OpenNEL_Lite/total?color=0&logo=github)](https://github.com/FandMC/OpenNEL_Lite/releases/latest)
-[![QQ](https://img.shields.io/badge/QQ_Unofficial-574456857-blue)](https://qm.qq.com/q/6gMnBzTV2E)
-
-## 本项目基于基于 [Codexus.OpenSDK](https://github.com/corpnetease/Codexus.OpenSDK) 以及 Codexus.Development.SDK 制作的第三方启动器
+## 本项目基于基于 [Codexus.OpenSDK](https://github.com/corpnetease/Codexus.OpenSDK) Codexus.Development.SDK 以及 OpenNel_Lite 制作的第三方启动器
 ### 安装要求
 - .Net 9.0
 
@@ -13,14 +10,14 @@ OpenNEL_Lite
 2. 双击打开即可
 
 ### 怎么装插件？
-1. 加群[![QQ](https://img.shields.io/badge/574456857-blue)](https://qm.qq.com/q/6gMnBzTV2E)
-2. 下载插件并放入plugins文件夹
+1. 下载一个codexus 然后在里面安装你要的插件
+2. 把codexus的插件复制并放入plugins文件夹
 3. 重启程序即可
 
 ## 开源协议
 本项目遵循 **[GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.html)** 协议开源
 ```text
-OpenNEL_Lite Copyright (C) 2025 OpenNEL Studio
+OpenNEL_Lite Plus Copyright (C) 2026 OpenNEL Plus Studio
 本程序是自由软件，你可以重新发布或修改它，但必须：
 - 保留原始版权声明
 - 采用相同许可证分发
