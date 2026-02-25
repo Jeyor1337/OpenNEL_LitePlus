@@ -17,7 +17,6 @@ internal class Program
         ConfigureRuntime();
         ConsoleBinder.Bind(args);
         ConfigureLogger();
-        await Hwid.ReportAsync();
         AppState.Debug = IsDebug();
         Log.Information("OpenNEL_Lite Plus github: {github}",AppInfo.GithubUrL);
         Log.Information("版本: {version}",AppInfo.AppVersion);
