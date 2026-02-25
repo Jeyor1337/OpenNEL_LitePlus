@@ -1,4 +1,3 @@
-using System.Net.Http;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
@@ -196,48 +195,56 @@ internal class ConsoleInteractive
         PrintColored("── 随机获取小号 ──", ConsoleColor.Cyan);
         Console.WriteLine();
 
-        var apiKey = Environment.GetEnvironmentVariable("NEL_API_KEY") ?? "****";
-        var apiUrl = Environment.GetEnvironmentVariable("NEL_API_URL") ?? "https://4399.sbcnm.tech/api/uf/get";
-
         while (true)
         {
             PrintColored("  正在从 API 获取小号...", ConsoleColor.Yellow);
+            await SendJsonAsync(new { type = "get_free_account", source = "random" });
 
             string? account = null;
             string? password = null;
             var fetchSuccess = false;
 
-            try
+            var endTime = DateTime.UtcNow.AddSeconds(30);
+            var gotAny = false;
+            while (DateTime.UtcNow < endTime)
             {
-                using var handler = new HttpClientHandler();
-                using var http = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(30) };
-                http.DefaultRequestHeaders.Add("X-Ciallo", apiKey);
-                var resp = await http.GetAsync(apiUrl);
-                var body = await resp.Content.ReadAsStringAsync();
+                var left = (int)(endTime - DateTime.UtcNow).TotalSeconds;
+                var timeout = gotAny ? Math.Min(left, 2) : left;
+                var line = await ReadLineAsync(Math.Max(1, timeout));
+                if (line == null) break;
+                gotAny = true;
 
-                using var doc = JsonDocument.Parse(body);
-                var root = doc.RootElement;
-
-                if (resp.IsSuccessStatusCode
-                    && root.TryGetProperty("code", out var codeProp) && codeProp.GetInt32() == 0
-                    && root.TryGetProperty("data", out var dataProp) && dataProp.ValueKind == JsonValueKind.String)
+                try
                 {
-                    var data = dataProp.GetString()!;
-                    var parts = data.Split("----", 2);
-                    if (parts.Length == 2 && !string.IsNullOrEmpty(parts[0]) && !string.IsNullOrEmpty(parts[1]))
+                    using var doc = JsonDocument.Parse(line);
+                    var root = doc.RootElement;
+                    var respType = root.TryGetProperty("type", out var t) ? t.GetString() ?? "" : "";
+
+                    if (respType == "get_free_account_result")
                     {
-                        account = parts[0];
-                        password = parts[1];
-                        fetchSuccess = true;
+                        var success = root.TryGetProperty("success", out var sp) && sp.ValueKind == JsonValueKind.True;
+                        if (success)
+                        {
+                            account = root.TryGetProperty("username", out var u) ? u.GetString() : null;
+                            password = root.TryGetProperty("password", out var p) ? p.GetString() : null;
+                            fetchSuccess = !string.IsNullOrEmpty(account) && !string.IsNullOrEmpty(password);
+                        }
+                        if (!fetchSuccess)
+                        {
+                            var msg = root.TryGetProperty("message", out var m) ? m.GetString() ?? "" : "";
+                            PrintColored($"  获取小号失败: {msg}", ConsoleColor.Red);
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        PrintResponse(line);
                     }
                 }
-
-                if (!fetchSuccess)
-                    PrintColored($"  获取小号失败: {body}", ConsoleColor.Red);
-            }
-            catch (Exception ex)
-            {
-                PrintColored($"  请求失败: {ex.Message}", ConsoleColor.Red);
+                catch
+                {
+                    PrintResponse(line);
+                }
             }
 
             if (!fetchSuccess)
@@ -256,15 +263,15 @@ internal class ConsoleInteractive
             await SendJsonAsync(new { type = "login_4399", account, password });
 
             var loginSuccess = false;
-            var endTime = DateTime.UtcNow.AddSeconds(15);
-            var gotAny = false;
-            while (DateTime.UtcNow < endTime)
+            var loginEndTime = DateTime.UtcNow.AddSeconds(15);
+            var loginGotAny = false;
+            while (DateTime.UtcNow < loginEndTime)
             {
-                var left = (int)(endTime - DateTime.UtcNow).TotalSeconds;
-                var timeout = gotAny ? Math.Min(left, 2) : left;
+                var left = (int)(loginEndTime - DateTime.UtcNow).TotalSeconds;
+                var timeout = loginGotAny ? Math.Min(left, 2) : left;
                 var line = await ReadLineAsync(Math.Max(1, timeout));
                 if (line == null) break;
-                gotAny = true;
+                loginGotAny = true;
                 PrintResponse(line);
 
                 try
@@ -383,9 +390,10 @@ internal class ConsoleInteractive
 
             var createItems = new[] { "创建新角色", "返回" };
             var cc = SelectMenu("加入游戏 - " + serverId, createItems, true);
-            if (cc == 0)
-                await CreateRoleAndJoinAsync(serverId, roles);
-            return;
+            if (cc != 0) return;
+
+            await CreateRoleAndJoinAsync(serverId, roles);
+            if (roles.Count == 0) return;
         }
 
         while (true)
@@ -521,24 +529,77 @@ internal class ConsoleInteractive
             Console.Clear();
             PrintColored("── 关闭游戏 ──", ConsoleColor.Cyan);
             Console.WriteLine();
-            Console.Write("  游戏标识符 (GUID, 多个用逗号分隔, 输入空行返回): ");
-            var input = Console.ReadLine()?.Trim() ?? "";
-            if (string.IsNullOrEmpty(input)) return;
+            PrintColored("  正在获取当前开启的进程...", ConsoleColor.Yellow);
+            await SendJsonAsync(new { type = "get_running_games" });
 
-            var identifiers = input.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-            if (identifiers.Length == 0)
+            var games = new List<(string Guid, string Display)>();
+            var endTime = DateTime.UtcNow.AddSeconds(10);
+            var gotAny = false;
+            while (DateTime.UtcNow < endTime)
             {
-                PrintColored("  输入无效，请重新输入", ConsoleColor.Red);
-                WaitKey();
-                continue;
+                var left = (int)(endTime - DateTime.UtcNow).TotalSeconds;
+                var timeout = gotAny ? Math.Min(left, 2) : left;
+                var line = await ReadLineAsync(Math.Max(1, timeout));
+                if (line == null) break;
+                gotAny = true;
+
+                try
+                {
+                    using var doc = JsonDocument.Parse(line);
+                    var root = doc.RootElement;
+                    var type = root.TryGetProperty("type", out var tp) ? tp.GetString() ?? "" : "";
+
+                    if (type == "running_games")
+                    {
+                        if (root.TryGetProperty("items", out var items) && items.ValueKind == JsonValueKind.Array)
+                        {
+                            foreach (var item in items.EnumerateArray())
+                            {
+                                var guid = item.TryGetProperty("name", out var gp) ? gp.ToString() : "";
+                                if (string.IsNullOrEmpty(guid)) continue;
+                                var role = item.TryGetProperty("role", out var rp) ? rp.GetString() ?? "未知角色" : "未知角色";
+                                var server = item.TryGetProperty("server", out var sp) ? sp.GetString() ?? "未知服务器" : "未知服务器";
+                                var local = item.TryGetProperty("local", out var lp) ? lp.GetString() ?? "" : "";
+                                var display = string.IsNullOrEmpty(local) ? $"{role} @ {server}" : $"{role} @ {server} ({local})";
+                                games.Add((guid, display));
+                            }
+                        }
+                        break;
+                    }
+
+                    PrintResponse(line);
+                }
+                catch
+                {
+                    PrintResponse(line);
+                }
             }
 
-            PrintColored("  正在关闭...", ConsoleColor.Yellow);
-            await SendJsonAsync(new { type = "shutdown_game", identifiers });
+            if (games.Count == 0)
+            {
+                PrintColored("  当前没有运行中的游戏进程", ConsoleColor.DarkGray);
+                WaitKey();
+                return;
+            }
+
+            var menuItems = new List<string>(games.Select(g => $"{g.Display} [{g.Guid}]"))
+            {
+                "刷新列表",
+                "返回"
+            };
+
+            var choice = SelectMenu("选择要关闭的进程", menuItems.ToArray(), true);
+            if (choice == -1 || choice == menuItems.Count - 1) return;
+            if (choice == menuItems.Count - 2) continue;
+
+            var selected = games[choice];
+            PrintColored($"  正在关闭: {selected.Display}", ConsoleColor.Yellow);
+            await SendJsonAsync(new { type = "shutdown_game", identifiers = new[] { selected.Guid } });
             await ReadAllResponsesAsync(10);
             return;
         }
     }
+
 
     async Task SendCustomAsync()
     {

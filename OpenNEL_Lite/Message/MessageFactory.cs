@@ -26,6 +26,7 @@ internal static class MessageFactory
             new CreateRoleNamedMessage(),
             new JoinGameMessage(),
             new ShutdownGameMessage(),
+            new GetRunningGamesMessage(),
             new GetFreeAccountMessage()
         };
         Map = handlers.ToDictionary(h => h.Type, h => h);

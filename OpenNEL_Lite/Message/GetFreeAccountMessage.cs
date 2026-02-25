@@ -11,6 +11,14 @@ internal class GetFreeAccountMessage : IWsMessage
     public string Type => "get_free_account";
     public async Task<object?> ProcessAsync(JsonElement root)
     {
+        var source = TryGetString(root, "source") ?? "register";
+        return source == "random"
+            ? await FetchRandomAccountAsync(root)
+            : await RegisterAccountAsync(root);
+    }
+
+    private async Task<object?> RegisterAccountAsync(JsonElement root)
+    {
         Log.Information("正在获取4399小号...");
         var status = new { type = "get_free_account_status", status = "processing", message = "获取小号中, 这可能需要点时间..." };
         HttpClient? client = null;
@@ -125,6 +133,67 @@ internal class GetFreeAccountMessage : IWsMessage
             client?.Dispose();
         }
         End:
+        return new object[] { status, resultPayload ?? new { type = "get_free_account_result", success = false, message = "未知错误" } };
+    }
+
+    private async Task<object?> FetchRandomAccountAsync(JsonElement root)
+    {
+        Log.Information("正在随机获取4399小号...");
+        var status = new { type = "get_free_account_status", status = "processing", message = "正在从 API 获取随机小号..." };
+        object? resultPayload = null;
+        try
+        {
+            var apiKey = TryGetString(root, "apiKey")
+                ?? Environment.GetEnvironmentVariable("NEL_API_KEY")
+                ?? "2175a76e-8c58-4532-8ac0-9ea3a8068a6a";
+            var apiUrl = TryGetString(root, "apiUrl")
+                ?? Environment.GetEnvironmentVariable("NEL_API_URL")
+                ?? "https://4399.sbcnm.tech/api/uf/get";
+
+            using var handler = new HttpClientHandler();
+            using var http = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(30) };
+            http.DefaultRequestHeaders.Add("X-Ciallo", apiKey);
+            var resp = await http.GetAsync(apiUrl);
+            var body = await resp.Content.ReadAsStringAsync();
+
+            using var doc = JsonDocument.Parse(body);
+            var d = doc.RootElement;
+
+            if (resp.IsSuccessStatusCode
+                && d.TryGetProperty("code", out var codeProp) && codeProp.GetInt32() == 0
+                && d.TryGetProperty("data", out var dataProp) && dataProp.ValueKind == JsonValueKind.String)
+            {
+                var data = dataProp.GetString()!;
+                var parts = data.Split("----", 2);
+                if (parts.Length == 2 && !string.IsNullOrEmpty(parts[0]) && !string.IsNullOrEmpty(parts[1]))
+                {
+                    var username = parts[0];
+                    var password = parts[1];
+                    Log.Information("随机获取成功: {Username}", username);
+                    resultPayload = new
+                    {
+                        type = "get_free_account_result",
+                        success = true,
+                        username,
+                        password,
+                        message = "获取成功！"
+                    };
+                }
+                else
+                {
+                    resultPayload = new { type = "get_free_account_result", success = false, message = "数据格式错误: " + data };
+                }
+            }
+            else
+            {
+                resultPayload = new { type = "get_free_account_result", success = false, message = "获取小号失败: " + body };
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Error(e, "随机获取小号错误: {Message}", e.Message);
+            resultPayload = new { type = "get_free_account_result", success = false, message = "请求失败: " + e.Message };
+        }
         return new object[] { status, resultPayload ?? new { type = "get_free_account_result", success = false, message = "未知错误" } };
     }
 
