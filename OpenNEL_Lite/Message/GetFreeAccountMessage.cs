@@ -1,4 +1,5 @@
 using OpenNEL_Lite.Network;
+using OpenNEL_Lite.type;
 using System.Text.Json;
 using System.Net.Http.Headers;
 using System.Net;
@@ -143,9 +144,10 @@ internal class GetFreeAccountMessage : IWsMessage
         object? resultPayload = null;
         try
         {
+            var customLqgKey = AdvancedConfig.Instance.LingQingGeApiKey;
             var apiKey = TryGetString(root, "apiKey")
                 ?? Environment.GetEnvironmentVariable("NEL_API_KEY")
-                ?? "2175a76e-8c58-4532-8ac0-9ea3a8068a6a";
+                ?? (string.IsNullOrEmpty(customLqgKey) ? "2175a76e-8c58-4532-8ac0-9ea3a8068a6a" : customLqgKey);
             var apiUrl = TryGetString(root, "apiUrl")
                 ?? Environment.GetEnvironmentVariable("NEL_API_URL")
                 ?? "https://4399.sbcnm.tech/api/uf/get";

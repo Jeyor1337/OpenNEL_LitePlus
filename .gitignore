@@ -1,5 +1,7 @@
 .idea
+.vs
 文档
 OpenNEL_Lite/bin
 OpenNEL_Lite/obj
 test
+web-ui/node_modules

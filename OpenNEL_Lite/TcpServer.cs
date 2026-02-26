@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Serilog;
 using OpenNEL_Lite.Message;
+using OpenNEL_Lite.Network;
 using OpenNEL_Lite.type;
 
 namespace OpenNEL_Lite;
@@ -99,37 +100,24 @@ internal class TcpServer
                 var line = content.Substring(0, idx).TrimEnd('\r');
                 content = content.Substring(idx + 1);
                 if (line.Length == 0) continue;
-                if (AppState.Debug)
-                {
-                    Log.Information("TCP Recv: {Text}", line);
-                }
                 try
                 {
-                    using var doc = JsonDocument.Parse(line);
-                    var root = doc.RootElement;
-                    var type = root.TryGetProperty("type", out var t) ? t.GetString() : null;
-                    if (!string.IsNullOrWhiteSpace(type))
+                    if (AppState.Debug)
                     {
-                        var handler = MessageFactory.Get(type);
-                        if (handler != null)
-                        {
-                            object? payload = null;
-                            try
-                            {
-                                payload = await handler.ProcessAsync(root);
-                            }
-                            catch (Exception ex)
-                            {
-                                var et = type + "_error";
-                                payload = new { type = et, message = ex.Message };
-                            }
-                            if (payload != null)
-                            {
-                                await Send(stream, payload);
-                            }
-                            continue;
-                        }
+                        Log.Information("TCP Recv: {Text}", line);
                     }
+
+                    var results = await ProtocolDispatcher.DispatchAsync(line);
+                    if (results.Count > 0)
+                    {
+                        foreach (var item in results)
+                        {
+                            var text = JsonSerializer.Serialize(item);
+                            if (!await SendText(stream, text)) return;
+                        }
+                        continue;
+                    }
+
                     if (AppState.Debug)
                     {
                         Log.Information("TCP Echo: {Text}", line);
@@ -149,24 +137,6 @@ internal class TcpServer
             sb.Append(content);
         }
         _clients.TryRemove(id, out _);
-    }
-
-    async Task Send(NetworkStream stream, object payload)
-    {
-        var seq = payload as System.Collections.IEnumerable;
-        if (seq != null && !(payload is string))
-        {
-            foreach (var item in seq)
-            {
-                if (item == null) continue;
-                var msg = JsonSerializer.Serialize(item);
-                var ok = await SendText(stream, msg);
-                if (!ok) return;
-            }
-            return;
-        }
-        var text = JsonSerializer.Serialize(payload);
-        await SendText(stream, text);
     }
 
     async Task<bool> SendText(NetworkStream stream, string text)

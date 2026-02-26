@@ -1,6 +1,7 @@
 using OpenNEL_Lite.Message.Game;
 using OpenNEL_Lite.Message.Login;
 using OpenNEL_Lite.Message.Connected;
+using OpenNEL_Lite.Message.Config;
 using OpenNEL_Lite.Network;
 
 namespace OpenNEL_Lite.Message;
@@ -22,6 +23,7 @@ internal static class MessageFactory
             new DeactivateAccountMessage(),
             new DeleteAccountMessage(),
             new GetAccountMessage(),
+            new GetAccountWebMessage(),
             new SelectAccountMessage(),
             new OpenServerMessage(),
             new CreateRoleNamedMessage(),
@@ -29,7 +31,11 @@ internal static class MessageFactory
             new ShutdownGameMessage(),
             new GetRunningGamesMessage(),
             new GetFreeAccountMessage(),
-            new SearchServerMessage()
+            new SearchServerMessage(),
+            new GetProxyConfigMessage(),
+            new SetProxyConfigMessage(),
+            new GetAdvancedConfigMessage(),
+            new SetAdvancedConfigMessage()
         };
         Map = handlers.ToDictionary(h => h.Type, h => h);
     }

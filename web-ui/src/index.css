@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+* {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+body {
+  @apply bg-white text-black m-0;
+}

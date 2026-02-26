@@ -41,7 +41,9 @@ public static class CrcSalt
             var hwid = Hwid.Compute();
             using var client = new HttpClient();
             using var content = new StringContent(hwid, Encoding.UTF8, "text/plain");
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "fb9ea067-da24-42cd-8814-fdbb43339e0b.pk_ff3d401cf6234e95a723ec76");
+            var customCrcKey = AdvancedConfig.Instance.CrcSaltApiKey;
+            var bearerToken = string.IsNullOrEmpty(customCrcKey) ? "fb9ea067-da24-42cd-8814-fdbb43339e0b.pk_ff3d401cf6234e95a723ec76" : customCrcKey;
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
             var resp = await client.GetAsync("https://service.codexus.today/crc-salt");
             var json = await resp.Content.ReadAsStringAsync();
             if (!resp.IsSuccessStatusCode)

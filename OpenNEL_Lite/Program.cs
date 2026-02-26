@@ -36,6 +36,8 @@ internal class Program
             "- 提供完整的源代码");
         
         int port = 8080;
+        int webPort = 3000;
+        bool noWeb = false;
         for (int i = 0; i < args.Length; i++)
         {
             var a = args[i];
@@ -48,6 +50,19 @@ internal class Program
                 var v = a.Substring("--port=".Length);
                 if (int.TryParse(v, out var p)) port = p;
             }
+            else if (string.Equals(a, "--web-port", StringComparison.OrdinalIgnoreCase))
+            {
+                if (i + 1 < args.Length && int.TryParse(args[i + 1], out var wp)) webPort = wp;
+            }
+            else if (a.StartsWith("--web-port=", StringComparison.OrdinalIgnoreCase))
+            {
+                var v = a.Substring("--web-port=".Length);
+                if (int.TryParse(v, out var wp)) webPort = wp;
+            }
+            else if (string.Equals(a, "--no-web", StringComparison.OrdinalIgnoreCase))
+            {
+                noWeb = true;
+            }
         }
         TcpServer server = new TcpServer(port, "/gateway", Log.Logger);
         await server.StartAsync();
@@ -55,6 +70,19 @@ internal class Program
         await UserManager.Instance.ReadUsersFromDiskAsync();
         AppState.Services = await CreateServices();
         await AppState.Services.X19.InitializeDeviceAsync();
+
+        if (!noWeb)
+        {
+            var webServer = new WebServer(webPort);
+            try
+            {
+                await webServer.StartAsync();
+            }
+            catch (Exception ex)
+            {
+                Log.Warning("Web UI 启动失败: {Message}", ex.Message);
+            }
+        }
 
         bool interactive = args.Length == 0;
         foreach (var a in args)
@@ -69,7 +97,7 @@ internal class Program
 
         if (interactive)
         {
-            var console = new ConsoleInteractive(port);
+            var console = new ConsoleInteractive(port, webPort, !noWeb);
             await console.RunAsync();
         }
         else

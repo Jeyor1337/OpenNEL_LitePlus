@@ -11,6 +11,10 @@
     <WarningLevel>0</WarningLevel>
   </PropertyGroup>
 
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
     <ItemGroup>
         <Reference Include="Codexus.Cipher">
             <HintPath>..\SDK\Codexus.Cipher.dll</HintPath>
@@ -59,6 +63,9 @@
         </Content>
         <Content Include="plugins\*">
           <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+        <Content Include="wwwroot\**\*">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
   </ItemGroup>
 

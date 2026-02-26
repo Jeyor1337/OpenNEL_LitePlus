@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
@@ -8,14 +9,18 @@ namespace OpenNEL_Lite;
 internal class ConsoleInteractive
 {
     private readonly int _port;
+    private readonly int _webPort;
+    private readonly bool _webEnabled;
     private TcpClient? _client;
     private NetworkStream? _stream;
     private byte[] _rest = [];
     private ProxyConfig _proxyConfig = ProxyConfig.Load();
 
-    public ConsoleInteractive(int port)
+    public ConsoleInteractive(int port, int webPort = 3000, bool webEnabled = true)
     {
         _port = port;
+        _webPort = webPort;
+        _webEnabled = webEnabled;
     }
 
     public async Task RunAsync()
@@ -60,8 +65,10 @@ internal class ConsoleInteractive
             "查看账号列表",
             "加入游戏",
             "关闭游戏",
+            "打开 Web UI",
             "发送自定义消息",
             "代理设置",
+            "高级设置",
             "关于",
             "退出"
         ];
@@ -69,7 +76,7 @@ internal class ConsoleInteractive
         while (true)
         {
             var choice = SelectMenu("OpenNEL Lite Plus", items);
-            if (choice == 7) return;
+            if (choice == 9) return;
 
             Console.Clear();
             try
@@ -80,9 +87,11 @@ internal class ConsoleInteractive
                     case 1: await ListAccountsAsync(); break;
                     case 2: await JoinGameAsync(); break;
                     case 3: await ShutdownGameAsync(); break;
-                    case 4: await SendCustomAsync(); break;
-                    case 5: ProxySettingsMenu(); break;
-                    case 6: ShowAbout(); break;
+                    case 4: OpenWebUi(); break;
+                    case 5: await SendCustomAsync(); break;
+                    case 6: ProxySettingsMenu(); break;
+                    case 7: AdvancedSettingsMenu(); break;
+                    case 8: ShowAbout(); break;
                 }
             }
             catch (Exception ex)
@@ -95,6 +104,7 @@ internal class ConsoleInteractive
             Console.ReadKey(true);
         }
     }
+
 
     static int SelectMenu(string title, string[] items, bool showEscHint = false)
     {
@@ -869,6 +879,78 @@ internal class ConsoleInteractive
         }
     }
 
+    void AdvancedSettingsMenu()
+    {
+        var config = AdvancedConfig.Instance;
+        while (true)
+        {
+            var items = new[]
+            {
+                $"凌清阁 API Key: {(string.IsNullOrEmpty(config.LingQingGeApiKey) ? "(使用内置)" : MaskKey(config.LingQingGeApiKey))}",
+                $"CRC盐 API Key: {(string.IsNullOrEmpty(config.CrcSaltApiKey) ? "(使用内置)" : MaskKey(config.CrcSaltApiKey))}",
+                "返回"
+            };
+
+            var choice = SelectMenu("高级设置", items, true);
+            if (choice == -1 || choice == 2) return;
+
+            Console.Clear();
+            switch (choice)
+            {
+                case 0:
+                    Console.Write("  凌清阁 API Key (输入空行恢复内置): ");
+                    var lqgKey = Console.ReadLine()?.Trim() ?? "";
+                    config.LingQingGeApiKey = string.IsNullOrEmpty(lqgKey) ? null : lqgKey;
+                    config.Save();
+                    PrintColored(string.IsNullOrEmpty(config.LingQingGeApiKey) ? "  已恢复使用内置 Key" : "  已保存自定义 Key", ConsoleColor.Green);
+                    WaitKey();
+                    break;
+                case 1:
+                    Console.Write("  CRC盐 API Key (输入空行恢复内置): ");
+                    var crcKey = Console.ReadLine()?.Trim() ?? "";
+                    config.CrcSaltApiKey = string.IsNullOrEmpty(crcKey) ? null : crcKey;
+                    config.Save();
+                    PrintColored(string.IsNullOrEmpty(config.CrcSaltApiKey) ? "  已恢复使用内置 Key" : "  已保存自定义 Key", ConsoleColor.Green);
+                    WaitKey();
+                    break;
+            }
+        }
+    }
+
+    void OpenWebUi()
+    {
+        if (!_webEnabled)
+        {
+            PrintColored("  Web UI 未启用（当前可能使用了 --no-web）", ConsoleColor.Red);
+            return;
+        }
+
+        var url = $"http://127.0.0.1:{_webPort}";
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
+            PrintColored($"  已尝试打开浏览器: {url}", ConsoleColor.Green);
+        }
+        catch (Exception ex)
+        {
+            PrintColored($"  打开失败，请手动访问: {url}", ConsoleColor.Red);
+            if (AppState.Debug)
+            {
+                PrintColored($"  错误详情: {ex.Message}", ConsoleColor.DarkRed);
+            }
+        }
+    }
+
+    static string MaskKey(string key)
+    {
+        if (key.Length <= 8) return new string('*', key.Length);
+        return key[..4] + new string('*', key.Length - 8) + key[^4..];
+    }
+
     static void ShowAbout()
     {
         Console.Clear();
@@ -896,6 +978,7 @@ internal class ConsoleInteractive
         PrintColored("  依赖项目:", ConsoleColor.DarkYellow);
         Console.WriteLine("    Codexus SDK - 核心 SDK 支持");
     }
+
 
     async Task SendJsonAsync(object obj)
     {
